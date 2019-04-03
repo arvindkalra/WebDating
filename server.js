@@ -83,7 +83,8 @@ app.get("/dashboard/:email", function(req, res) {
     res.render("ImageView", {
       people: array,
       length:array.length,
-      email: email
+      email: email,
+      empty: array.length === 0
     });
   });
 });

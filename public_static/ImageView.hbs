@@ -39,44 +39,131 @@
     }
 
     #controls.active{
-        display: block;
+        display: flex;
     }
+
+    #show{
+        font-size: 2em;
+        width: 50%;
+        position: relative;
+        left: 25%;
+        top: 25vh;
+    }
+        #imageStack{
+            margin: 0 auto;
+            position: relative;
+            width: 30%;
+        }
+        .name{
+            border-bottom: solid;
+            border-bottom-color: brown;
+            margin: 10px 10%;
+            padding: 5px;
+            text-align: center;
+            font-size: 1.4em;
+        }
+
+        .controlbutton{
+            width: 60%;
+            position: relative;
+            left: 20%;
+        }
+
+        .fullBox{
+            margin: 5%;
+        }
+
 </style>
 </head>
 <body>
-<button id="show">
+<a class="button is-danger is-rounded" id="show">
     Show Images
-</button>
+</a>
+<div class="fullBox">
 <div id="imageStack" aria-length="{{length}}">
     {{#each people}}
         <div class="imageBlock" id="{{@index}}">
-            <figure class="image is-128x128">
+            <figure class="image">
                 <img src="{{this.image}}">
             </figure>
-            <div>{{this.email}}</div>
+            <div class="name">{{this.email}}</div>
         </div>
     {{/each}}
 </div>
-<div id="controls">
-    <button id="prev">PREV</button>
-    <button id="like">Like</button>
-    <button id="super_like">Super Like</button>
-    <button id="block">Block</button>
-    <button id="next">NEXT</button>
+
+<div class="columns" id="controls">
+    <div class="column">
+        <button id="prev" class="button is-info is-rounded controlbutton">Previous</button>
+    </div>
+    <div class="column">
+        <a id="like" class="button is-success is-rounded controlbutton">Like</a>
+    </div>
+    <div class="column">
+        <a id="block" class="button is-danger is-rounded controlbutton">Block</a>
+    </div>
+    <div class="column">
+        <a id="super_like" class="button is-link is-rounded controlbutton">Super Like</a>
+    </div>
+    <div class="column">
+        <a id="next" class="button is-info is-rounded controlbutton">NEXT</a>
+    </div>
+</div>
+</div>
+
+
+<div class="modal" id="likeModal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Like Received</p>
+            <button class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+            Who are these new people liking your profile
+        </section>
+    </div>
+</div>
+
+
+<div class="modal" id="superLikeModal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">You are Super Liked</p>
+            <button class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+            <p class="image is-4by3">
+                <img src="https://bulma.io/images/placeholders/1280x960.png" id="superLikeImg" alt="">
+            </p>
+        </section>
+    </div>
 </div>
 
 
 <script>
+
+    $('.modal-background').click(function () {
+        $(this).parent().removeClass('is-active');
+    });
+
+    $('.delete').click(function () {
+        $(this).parent().parent().parent().removeClass('is-active');
+    });
+
     let socket = io.connect('http://localhost:2000', {
         query: {token: token}
     });
     socket.emit('login',  "{{email}}" );
 
     socket.on('liked', function () {
+        $('#likeModal').addClass('is-active');
         console.log("someone Liked You")
     });
 
     socket.on('super_liked', function ({hisImage}) {
+        $('#superLikeImg').attr('src', hisImage);
+        $('#superLikeModal').addClass('is-active');
         console.log(hisImage);
     });
 
@@ -100,7 +187,9 @@
 <script>
 
 $('#show').click(function () {
+    $('#show').remove();
     let i = 0;
+    let blocked = [];
     let length = $('#imageStack').attr('aria-length');
     $(`#${i}`).addClass('active');
     $('#controls').addClass('active');
@@ -108,12 +197,18 @@ $('#show').click(function () {
     $('#prev').click(function () {
         $(`#${i}`).removeClass('active');
         i = i === 0 ? length - 1 : i - 1;
+        while (blocked.indexOf(i) !== -1){
+            i = i === 0 ? length - 1 : i - 1;
+        }
         $(`#${i}`).addClass('active');
     });
 
     $('#next').click(function () {
         $(`#${i}`).removeClass('active');
         i = i === length - 1 ? 0 : i + 1;
+        while (blocked.indexOf(i) !== -1){
+            i = i === length - 1 ? 0 : i + 1;
+        }
         $(`#${i}`).addClass('active');
     });
 
@@ -130,6 +225,7 @@ $('#show').click(function () {
     $('#block').click(function () {
        let blockMail =  $(`#${i}>div`).html();
        block("{{email}}", blockMail);
+       blocked.push(i);
        $(`#${i}`).removeClass('active');
        $(`#${i}`).remove();
        i = i === length - 1 ? 0 : i + 1;

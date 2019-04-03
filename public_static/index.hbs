@@ -8,68 +8,148 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <style>
+        .modalOpenButton{
+            width: 50%;
+            position: relative;
+            font-size: 1.7em;
+        }
+        #controls{
+            margin: 10%;
+        }
+        #reg{
+            left: 50%;
+        }
+    </style>
   </head>
   <body>
-    <form id="signpform" method="post" enctype="multipart/form-data" action="/signup">
-      <div class="field">
-        <div class="control">
-          <input
-            class="input is-primary"
-            type="text"
-            placeholder="Email Input"
-            name="email"
-            id="email"
-          />
-        </div>
-      </div>
-      <div class="field">
-        <div class="control">
-          <input
-            class="input is-primary"
-            type="password"
-            placeholder="Password Input"
-            name="password"
-            id="password"
-          />
-        </div>
-      </div>
-      <div class="file">
-        <label class="file-label">
-          <input class="file-input" type="file" id="image" name="image"/>
-          <span class="file-cta">
-            <span class="file-label">
-              Choose an image..
-            </span>
-          </span>
-        </label>
-      </div>
-      <a class="button is-success" id="submit">Submit</a>
-    </form>
 
-    <div id="loginform"  method="post" enctype="multipart/form-data" action="/signup">
-      <div class="field">
-        <div class="control">
-          <input
-            class="input is-primary"
-            type="text"
-            placeholder="Email Input"
-            id="emailLogin"
-          />
-        </div>
+
+  <div class="columns" id="controls">
+      <div class="column">
+          <button id="reg" class="button is-info modalOpenButton">Register</button>
       </div>
-      <div class="field">
-        <div class="control">
-          <input
-            class="input is-primary"
-            type="password"
-            placeholder="Password Input"
-            id="passwordLogin"
-          />
-        </div>
+      <div class="column">
+          <a id="log" class="button is-info modalOpenButton">Login</a>
       </div>
+  </div>
+
+
+    <div class="modal" id="loginModal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Login</p>
+                <button class="delete" aria-label="close"></button>
+            </header>
+            <section class="modal-card-body">
+                <div id="loginform"  method="post" enctype="multipart/form-data" action="/signup">
+                    <div class="field">
+                        <div class="control">
+                            <input
+                                    class="input is-primary"
+                                    type="text"
+                                    placeholder="Email Input"
+                                    id="emailLogin"
+                            />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <input
+                                    class="input is-primary"
+                                    type="password"
+                                    placeholder="Password Input"
+                                    id="passwordLogin"
+                            />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <a class="button is-success" id="submitLogin">Submit</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
-    <a class="button is-success" id="submitLogin">Submit</a>
+
+    <div class="modal" id="registerModal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Register</p>
+                <button class="delete" aria-label="close"></button>
+            </header>
+            <section class="modal-card-body">
+
+                <div id="signpform" method="post" enctype="multipart/form-data" action="/signup">
+                    <div class="field">
+                        <div class="control">
+                            <input
+                                    class="input is-primary"
+                                    type="text"
+                                    placeholder="Email Input"
+                                    name="email"
+                                    id="email"
+                            />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <input
+                                    class="input is-primary"
+                                    type="password"
+                                    placeholder="Password Input"
+                                    name="password"
+                                    id="password"
+                            />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <div class="file">
+                                <label class="file-label">
+                                    <input class="file-input" type="file" id="image" name="image"/>
+                                    <span class="file-cta">
+                                        <span class="file-label">
+                                            Choose an image..
+                                        </span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <a class="button is-success" id="submit">Submit</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+
     <script>
+
+        $('.modal-background').click(function () {
+            $(this).parent().removeClass('is-active');
+        });
+
+        $('.delete').click(function () {
+            console.log($(this));
+            $(this).parent().parent().parent().removeClass('is-active');
+        });
+
+        $('#reg').click(function () {
+           $('#registerModal').addClass('is-active')
+        });
+
+        $('#log').click(function () {
+            $('#loginModal').addClass('is-active')
+        });
+
       $("#submit").click(function() {
         let email = $("#email").val();
         let password = $("#password").val();
