@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tinder</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <form id="signpform" method="post" enctype="multipart/form-data" action="/signup">
+      <div class="field">
+        <div class="control">
+          <input
+            class="input is-primary"
+            type="text"
+            placeholder="Email Input"
+            name="email"
+            id="email"
+          />
+        </div>
+      </div>
+      <div class="field">
+        <div class="control">
+          <input
+            class="input is-primary"
+            type="password"
+            placeholder="Password Input"
+            name="password"
+            id="password"
+          />
+        </div>
+      </div>
+      <div class="file">
+        <label class="file-label">
+          <input class="file-input" type="file" id="image" name="image"/>
+          <span class="file-cta">
+            <span class="file-label">
+              Choose an image..
+            </span>
+          </span>
+        </label>
+      </div>
+      <a class="button is-success" id="submit">Submit</a>
+    </form>
+
+    <div id="loginform"  method="post" enctype="multipart/form-data" action="/signup">
+      <div class="field">
+        <div class="control">
+          <input
+            class="input is-primary"
+            type="text"
+            placeholder="Email Input"
+            id="emailLogin"
+          />
+        </div>
+      </div>
+      <div class="field">
+        <div class="control">
+          <input
+            class="input is-primary"
+            type="password"
+            placeholder="Password Input"
+            id="passwordLogin"
+          />
+        </div>
+      </div>
+    </div>
+    <a class="button is-success" id="submitLogin">Submit</a>
+    <script>
+      $("#submit").click(function() {
+        let email = $("#email").val();
+        let password = $("#password").val();
+        let file = $("#image").get(0).files[0];
+        let form = new FormData();
+        form.append("email", email);
+        form.append("password", password);
+        form.append("image", file);
+
+        $.ajax({
+          url: "/signup",
+          type: "POST",
+          enctype: "multipart/form-data",
+          processData: false, // Important
+          contentType: false,
+          cache: false,
+          data: form,
+          success: function(res) {
+            token = res.token;
+            localStorage.setItem("token", token);
+            window.location = `/dashboard/${email}`;
+          }
+        });
+      });
+
+      $("#submitLogin").click(function() {
+        let email = $("#emailLogin").val();
+        let password = $("#passwordLogin").val();
+        let data = {
+          email: email,
+          password: password
+        };
+        $.post("/login", data, function(res) {
+          token = res.token;
+          localStorage.setItem("token", token);
+          window.location = `/dashboard/${email}`;
+        });
+      });
+    </script>
+  </body>
+</html>

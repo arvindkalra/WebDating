@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tinder - Dashboard</title>
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <script>
+        let token = localStorage.getItem('token');
+        $.ajaxSetup({
+            beforeSend: function (xhr)
+            {
+                xhr.setRequestHeader("Authorization",`Bearer ${token}`);
+            }
+        });
+        $.get('/test', function (res) {
+            console.log(res);
+            if(!res.done){
+                localStorage.removeItem('token');
+                window.location = '/';
+            }
+        })
+    </script>
+    <style>
+    .imageBlock{
+        display: none;
+    }
+
+    .imageBlock.active{
+        display: block;
+    }
+
+    #controls{
+        display: none;
+    }
+
+    #controls.active{
+        display: block;
+    }
+</style>
+</head>
+<body>
+<button id="show">
+    Show Images
+</button>
+<div id="imageStack" aria-length="{{length}}">
+    {{#each people}}
+        <div class="imageBlock" id="{{@index}}">
+            <figure class="image is-128x128">
+                <img src="{{this.image}}">
+            </figure>
+            <div>{{this.email}}</div>
+        </div>
+    {{/each}}
+</div>
+<div id="controls">
+    <button id="prev">PREV</button>
+    <button id="like">Like</button>
+    <button id="super_like">Super Like</button>
+    <button id="block">Block</button>
+    <button id="next">NEXT</button>
+</div>
+
+
+<script>
+    let socket = io.connect('http://localhost:2000', {
+        query: {token: token}
+    });
+    socket.emit('login',  "{{email}}" );
+
+    socket.on('liked', function () {
+        console.log("someone Liked You")
+    });
+
+    socket.on('super_liked', function ({hisImage}) {
+        console.log(hisImage);
+    });
+
+    function like(otherMail) {
+        socket.emit('like', otherMail);
+    }
+
+    function superLike(myMail, otherMail) {
+        console.log(myMail, otherMail);
+        socket.emit('super_like', {myEmail : myMail, likedEmail : otherMail});
+    }
+
+    function block(myMail, otherMail) {
+        $.post('/blockuser', {
+            myEmail: myMail,
+            blockEmail: otherMail
+        })
+    }
+</script>
+
+<script>
+
+$('#show').click(function () {
+    let i = 0;
+    let length = $('#imageStack').attr('aria-length');
+    $(`#${i}`).addClass('active');
+    $('#controls').addClass('active');
+
+    $('#prev').click(function () {
+        $(`#${i}`).removeClass('active');
+        i = i === 0 ? length - 1 : i - 1;
+        $(`#${i}`).addClass('active');
+    });
+
+    $('#next').click(function () {
+        $(`#${i}`).removeClass('active');
+        i = i === length - 1 ? 0 : i + 1;
+        $(`#${i}`).addClass('active');
+    });
+
+    $('#like').click(function () {
+        let likedMail = $(`#${i}>div`).html();
+        like(likedMail);
+    });
+
+    $('#super_like').click(function () {
+        let likedMail = $(`#${i}>div`).html();
+        superLike("{{email}}", likedMail);
+    });
+
+    $('#block').click(function () {
+       let blockMail =  $(`#${i}>div`).html();
+       block("{{email}}", blockMail);
+       $(`#${i}`).removeClass('active');
+       $(`#${i}`).remove();
+       i = i === length - 1 ? 0 : i + 1;
+       $(`#${i}`).addClass('active');
+    });
+})
+
+</script>
+</body>
+</html>
